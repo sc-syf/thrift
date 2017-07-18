@@ -813,7 +813,7 @@ void t_py_generator::generate_py_struct_definition(ofstream& out,
     indent_down();
   }
 
-  if (is_immutable(tstruct)) {
+  if (is_immutable(tstruct) | is_exception) {
     out << endl;
     out << indent() << "def __setattr__(self, *args):" << endl
         << indent() << indent_str() << "raise TypeError(\"can't modify immutable instance\")" << endl
