@@ -813,7 +813,7 @@ void t_py_generator::generate_py_struct_definition(ofstream& out,
     indent_down();
   }
 
-  if (is_immutable(tstruct) | is_exception) {
+  if (is_immutable(tstruct)) {
     out << endl;
     out << indent() << "def __setattr__(self, *args):" << endl
         << indent() << indent_str() << "raise TypeError(\"can't modify immutable instance\")" << endl
@@ -822,6 +822,19 @@ void t_py_generator::generate_py_struct_definition(ofstream& out,
         << indent() << indent_str() << "raise TypeError(\"can't modify immutable instance\")" << endl
         << endl;
 
+    // Hash all of the members in order, and also hash in the class
+    // to avoid collisions for stuff like single-field structures.
+    out << indent() << "def __hash__(self):" << endl
+        << indent() << indent_str() << "return hash(self.__class__) ^ hash((";
+
+    for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
+      out << "self." << (*m_iter)->get_name() << ", ";
+    }
+
+    out << "))" << endl;
+  }
+
+  if (is_exception) {
     // Hash all of the members in order, and also hash in the class
     // to avoid collisions for stuff like single-field structures.
     out << indent() << "def __hash__(self):" << endl
